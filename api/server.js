@@ -57,7 +57,8 @@ const database = {
         },
       ]
     },
-  ]
+  ],
+  orders: [],
 }
 
 app.get("/", (req, res) => {
@@ -78,6 +79,41 @@ app.get("/artwork", (req, res) => {
     res.json(filteredArtwork);
   }
   res.send(database.artwork);
+});
+
+// Adds a new order to the db and sends emails to printer and customer
+app.post("/orders", (req, res) => {
+  console.log("POST /orders", req.body);
+  if (req.body) {
+    const body = req.body;
+    // Check for required order data
+    if (!body.artworkId) res.status(400).end("Missing artworkId");
+    if (!body.title) res.status(400).end("Missing artwork title");
+    if (!body.artistName) res.status(400).end("Missing artistName");
+    if (!body.printOption) res.status(400).end("Missing printOption");
+    if (!body.price) res.status(400).end("Missing price");
+    if (!body.shippingCost) res.status(400).end("Missing shippingCost");
+    if (!body.artistName) res.status(400).end("Missing artistName");
+    if (!body.revenue) res.status(400).end("Missing revenue");
+
+    const orderId = database.orders.length + 1;
+    database.orders.push({
+      orderId: orderId,
+      artworkId: body.artworkId,
+      title: body.title,
+      artistName: body.artistName,
+      printOption: body.printOption,
+      price: body.price,
+      shippingCost: body.shippingCost,
+      artistName: body.artistName,
+      revenue: body.revenue,
+    });
+    res.end(`Added order: ${orderId}`);
+    console.log(`Successfully added order ${orderId}`);
+    console.log("TODO: Send order to printer");
+    console.log("TODO: Send confirmation to customer");
+  }
+  res.status(400).end("Should add order, bad request body");
 })
 
 app.listen(3000, () => {
